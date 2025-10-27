@@ -2,252 +2,335 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Sean Raisor – Full Family Genogram (Rubric-Compliant)</title>
+<title>Sean Raisor – Genogram (Rubric-Compliant, Auto-Layout)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
-  /* Page / print */
-  body { margin:0; font-family: Arial, sans-serif; background:#fff; }
-  @media print { @page { size: A4 landscape; margin: 10mm; } }
-
-  /* Shapes */
-  .male rect { fill:none; stroke:#000; stroke-width:2; }
-  .female circle { fill:none; stroke:#000; stroke-width:2; }
-  .deceased rect, .deceased circle { stroke:#c00; }
-  .xslash { stroke:#c00; stroke-width:2.2; }
-
-  /* Lines */
-  .line { stroke-width:2; fill:none; }
-  .close { stroke:#000; stroke-dasharray:0; }            /* solid */
-  .amicable { stroke:#555; stroke-dasharray:6 3 1 3; }   /* dash-dot (friendly) */
-  .distant { stroke:#777; stroke-dasharray:5 4; }        /* dashed */
-  .cutoff { stroke:#00f; stroke-dasharray:2 3; }         /* fine dashed (blue) */
-
-  .text { font-size:11px; text-anchor:middle; }
-  .small { font-size:10px; fill:#000; }
-  .legend { font-size:12px; }
-  .muted { fill:#444; font-size:11px; }
-  .title { font-size:18px; font-weight:bold; }
-  .subtitle { font-size:13px; }
+  :root{
+    --w: 150;   /* base node width */
+    --h: 66;    /* base node height */
+    --xgap: 50; /* horizontal gap between nodes */
+    --ygap: 90; /* vertical gap between generations/rows */
+    --font: 12px;
+  }
+  html,body{margin:0;background:#fff;font-family:Arial,Helvetica,sans-serif;}
+  .page{max-width:1400px;margin:8px auto;padding:8px;}
+  h1{font-size:20px;margin:0 0 4px;text-align:center}
+  h2{font-size:13px;margin:0 0 10px;text-align:center;color:#555}
+  .legend{font-size:12px;margin-top:8px}
+  svg{width:100%;height:auto;border:1px solid #ddd;background:#fff}
+  /* shapes */
+  .male rect{fill:none;stroke:#000;stroke-width:2}
+  .female circle{fill:none;stroke:#000;stroke-width:2}
+  .deceased rect,.deceased circle{stroke:#c00}
+  .xslash{stroke:#c00;stroke-width:2.2}
+  /* lines */
+  .line{stroke-width:2;fill:none}
+  .close{stroke:#000}
+  .amicable{stroke:#666;stroke-dasharray:6 3 1 3}
+  .distant{stroke:#777;stroke-dasharray:5 4}
+  .cutoff{stroke:#06f;stroke-dasharray:2 3}
+  .label{font-size:10px;fill:#000}
+  .nodeText{font-size:12px;fill:#000;text-anchor:middle}
+  .small{font-size:11px;fill:#444}
+  .keyRow{display:flex;gap:18px;align-items:center;margin:4px 0}
+  .keySwatch{width:48px;height:0;border-top:2px solid #000}
+  .keySwatch.amicable{border-top-style:dashed;border-image:linear-gradient(#666,#666) 1}
+  .keySwatch.distant{border-top:2px dashed #777}
+  .keySwatch.cutoff{border-top:2px dashed #06f}
+  .foot{font-size:12px;margin-top:6px;color:#444}
+  @media print{@page{size: A4 landscape; margin:10mm}}
 </style>
 </head>
 <body>
+<div class="page">
+  <h1>Sean Raisor – Family Genogram</h1>
+  <h2>Father’s family on the left • Mother’s family on the right • Three generations • Relationship lines labeled • Deceased marked with X</h2>
 
-<!-- Large canvas: tuned for one landscape page -->
-<svg viewBox="0 0 1400 900" width="100%" height="100%">
+  <svg id="genogram" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMin slice"></svg>
 
-  <!-- Title -->
-  <text x="700" y="35" class="title" text-anchor="middle">
-    Sean Raisor – Family Genogram (Rubric-Compliant, One-Page Landscape)
-  </text>
-  <text x="700" y="55" class="subtitle" text-anchor="middle">
-    Father’s family on left • Mother’s family on right • Three generations • Relationship lines labeled • Deceased marked with X
-  </text>
+  <div class="legend">
+    <div class="keyRow">
+      <div>Symbols:</div>
+      <div>☐ Male</div>
+      <div>○ Female</div>
+      <div>X (red slash) = Deceased</div>
+      <div>Double-thick square = Student (Sean)</div>
+    </div>
+    <div class="keyRow">
+      <div>Relationships:</div>
+      <div class="keySwatch"></div><div>Close</div>
+      <div class="keySwatch amicable"></div><div>Amicable</div>
+      <div class="keySwatch distant"></div><div>Distant</div>
+      <div class="keySwatch cutoff"></div><div>Cut-Off</div>
+    </div>
+    <div class="keyRow">
+      <div>Themes (legend-only color):</div>
+      <div>🟣 Parenting: Strong Matriarchal Influence</div>
+      <div>🔵 Communication: Emotional Distance / Cut-Off</div>
+    </div>
+    <div class="foot"><b>Verification:</b> Information verified through Amy Raisor and personal knowledge. Paternal grandfather details unknown due to long-term cut-off (this unavailability itself reflects the cut-off theme).</div>
+  </div>
+</div>
 
-  <!-- ===================== GEN 1: GRANDPARENTS ===================== -->
-  <!-- Paternal grandparents (LEFT) -->
-  <!-- NOTE: Paternal grandfather unknown per your note -->
-  <!-- Grandfather (Unknown male) -->
-  <g class="male" transform="translate(120,110)">
-    <rect x="-30" y="-30" width="60" height="60" />
-    <text class="text" x="0" y="45">Unknown (Paternal GF)<tspan x="0" dy="14">Name/Occ Unknown</tspan></text>
-  </g>
+<script>
+/**
+ * Auto-layout genogram: define people and relations, the script computes a clean grid
+ * so nodes don’t overlap. You can edit the data below without changing coordinates.
+ *
+ * Conventions:
+ * - sex: 'M' | 'F'
+ * - deceased: true|false
+ * - gen: 1 (grandparents), 2 (parents & their siblings), 3 (you & siblings), 4 (children)
+ * - side: 'paternal' | 'maternal' (controls left/right bias)
+ * - rel: relationship lines between ids with type: close | amicable | distant | cutoff, with optional label
+ */
 
-  <!-- Grandmother Mary (female, unknown details) -->
-  <g class="female" transform="translate(260,110)">
-    <circle cx="0" cy="0" r="30" />
-    <text class="text" x="0" y="45">Mary (last name unknown)<tspan x="0" dy="14">Unknown</tspan></text>
-  </g>
+const people = [
+  // ===== Gen 1: Grandparents =====
+  {id:'pGF', name:'Unknown (Paternal Grandfather)', age:'?', edu:'?', occ:'?', sex:'M', deceased:false, gen:1, side:'paternal'},
+  {id:'pGM', name:'Mary (last name unknown)', age:'?', edu:'?', occ:'Unknown', sex:'F', deceased:false, gen:1, side:'paternal'},
 
-  <!-- Marriage line (paternal grandparents) -->
-  <line x1="90" y1="110" x2="230" y2="110" class="line close"/>
-  <text x="160" y="100" class="small">Close</text>
+  {id:'mGM', name:'Marie Hettrich', age:'✝', edu:'?', occ:'Homemaker', sex:'F', deceased:true, gen:1, side:'maternal'},
+  {id:'mGF', name:'Joseph Raisor', age:'✝', edu:'?', occ:'Factory Worker', sex:'M', deceased:true, gen:1, side:'maternal'},
 
-  <!-- Maternal grandparents (RIGHT) -->
-  <!-- Marie Hettrich (deceased, female) -->
-  <g class="female deceased" transform="translate(1050,110)">
-    <circle cx="0" cy="0" r="30" />
-    <!-- X slash for deceased -->
-    <line x1="-22" y1="-22" x2="22" y2="22" class="xslash" />
-    <line x1="-22" y1="22" x2="22" y2="-22" class="xslash" />
-    <text class="text" x="0" y="45">Marie Hettrich ✝<tspan x="0" dy="14">Homemaker</tspan></text>
-  </g>
+  // ===== Gen 2: Parents + aunts/uncles =====
+  {id:'dad', name:'Clement Robinson', age:'88', edu:'?', occ:'Hydraulic Engineer', sex:'M', deceased:false, gen:2, side:'paternal'},
+  {id:'stephen', name:'Stephen Robinson', age:'50s', edu:'?', occ:'Glass Blower', sex:'M', deceased:false, gen:2, side:'paternal'},
 
-  <!-- Joseph Raisor (deceased, male) -->
-  <g class="male deceased" transform="translate(1200,110)">
-    <rect x="-30" y="-30" width="60" height="60" />
-    <!-- X slash -->
-    <line x1="-30" y1="-30" x2="30" y2="30" class="xslash" />
-    <line x1="-30" y1="30" x2="30" y2="-30" class="xslash" />
-    <text class="text" x="0" y="45">Joseph Raisor ✝<tspan x="0" dy="14">Factory Worker</tspan></text>
-  </g>
+  {id:'mom', name:'Amy Raisor', age:'67', edu:'Nursing School', occ:'Registered Nurse', sex:'F', deceased:false, gen:2, side:'maternal'},
+  {id:'peggy', name:'Peggy Raisor', age:'75', edu:'?', occ:'Caregiver', sex:'F', deceased:false, gen:2, side:'maternal'},
+  {id:'bonnie', name:'Bonnie Raisor', age:'62', edu:'?', occ:'Caregiver', sex:'F', deceased:false, gen:2, side:'maternal'},
+  {id:'julie', name:'Julie Raisor', age:'60', edu:'?', occ:'Caregiver', sex:'F', deceased:false, gen:2, side:'maternal'},
+  {id:'uncJoe', name:'Joseph Raisor', age:'✝', edu:'?', occ:'?', sex:'M', deceased:true, gen:2, side:'maternal'},
+  {id:'uncMike', name:'Michael Raisor', age:'✝', edu:'?', occ:'?', sex:'M', deceased:true, gen:2, side:'maternal'},
 
-  <!-- Marriage line (maternal grandparents) -->
-  <line x1="1080" y1="110" x2="1170" y2="110" class="line close" />
-  <text x="1125" y="100" class="small">Close</text>
+  // ===== Gen 3: You & siblings =====
+  {id:'steph', name:'Stephanie Raisor', age:'43', edu:'Nursing', occ:'Registered Nurse', sex:'F', deceased:false, gen:3, side:'maternal'},
+  {id:'shelli', name:'Shelli Raisor', age:'?', edu:'Nursing', occ:'Registered Nurse', sex:'F', deceased:false, gen:3, side:'maternal'},
+  {id:'sean', name:'Sean Raisor', age:'25', edu:'College', occ:'CS Student / Founder', sex:'M', deceased:false, gen:3, side:'maternal', student:true},
 
-  <!-- ===================== GEN 2: PARENTS & THEIR SIBLINGS ===================== -->
-  <!-- Father: Clement Robinson (left side) -->
-  <g class="male" transform="translate(220,300)">
-    <rect x="-30" y="-30" width="60" height="60" />
-    <text class="text" x="0" y="45">Clement Robinson<tspan x="0" dy="14">88 | Hydraulic Engineer</tspan></text>
-  </g>
+  // ===== Gen 4: Children =====
+  {id:'elias', name:'Elias Raisor', age:'4', edu:'Preschool', occ:'Child', sex:'M', deceased:false, gen:4, side:'maternal'},
 
-  <!-- Half-brother (father’s other son): Stephen Robinson -->
-  <g class="male" transform="translate(80,300)">
-    <rect x="-30" y="-30" width="60" height="60" />
-    <text class="text" x="0" y="45">Stephen Robinson<tspan x="0" dy="14">50s | Glass Blower</tspan></text>
-  </g>
+  {id:'chris', name:'Chris Brammer', age:'27', edu:'?', occ:'?', sex:'M', deceased:false, gen:4, side:'maternal'},
+  {id:'lydia', name:'Lydia Planche', age:'23', edu:'?', occ:'?', sex:'F', deceased:false, gen:4, side:'maternal'},
+  {id:'israel', name:'Israel Planche', age:'18 ✝', edu:'?', occ:'?', sex:'M', deceased:true, gen:4, side:'maternal'},
+  {id:'havilah', name:'Havilah Planche', age:'13', edu:'?', occ:'?', sex:'F', deceased:false, gen:4, side:'maternal'},
+  {id:'evangelina', name:'Evangelina Planche', age:'3', edu:'?', occ:'?', sex:'F', deceased:false, gen:4, side:'maternal'},
 
-  <!-- Child connection Unknown GF -> Clement Robinson (parent-child) -->
-  <line x1="120" y1="140" x2="220" y2="270" class="line close"/>
-  <!-- Label mid-way -->
-  <text x="170" y="205" class="small">Parent–Child</text>
+  {id:'bailey', name:'Bailey Gravely', age:'25', edu:'?', occ:'?', sex:'F', deceased:false, gen:4, side:'maternal'},
+  {id:'ethan', name:'Ethan Wellman', age:'22', edu:'?', occ:'?', sex:'M', deceased:false, gen:4, side:'maternal'},
+  {id:'ashton', name:'Ashton Wellman', age:'13', edu:'?', occ:'?', sex:'M', deceased:false, gen:4, side:'maternal'},
+  {id:'oliver', name:'Oliver Wellman', age:'10', edu:'?', occ:'?', sex:'M', deceased:false, gen:4, side:'maternal'}
+];
 
-  <!-- Mary -> Clement (parent-child) -->
-  <line x1="260" y1="140" x2="220" y2="270" class="line close"/>
+// Couples (for marriage/union lines)
+const couples = [
+  ['pGF','pGM','close'],            // paternal grandparents
+  ['mGM','mGF','close'],            // maternal grandparents
+];
 
-  <!-- NOTE: Stephen shown as father’s child (sibling/half relation to Sean) – no need to connect to mother’s side -->
+// Parent-child links
+const parentChild = [
+  // paternal side
+  ['pGF','dad','close'], ['pGM','dad','close'],
+  // Stephen is dad's other child (half-brother to you) – we only show as dad->stephen
+  ['dad','stephen','amicable'],
 
-  <!-- Mother: Amy Raisor (right side) -->
-  <g class="female" transform="translate(1100,300)">
-    <circle cx="0" cy="0" r="30" />
-    <text class="text" x="0" y="45">Amy Raisor<tspan x="0" dy="14">67 | RN | Nursing School</tspan></text>
-  </g>
+  // maternal side: grandparents -> Amy + siblings
+  ['mGM','mom','close'], ['mGF','mom','close'],
+  ['mGM','peggy','close'], ['mGF','peggy','close'],
+  ['mGM','bonnie','close'], ['mGF','bonnie','close'],
+  ['mGM','julie','close'], ['mGF','julie','close'],
+  ['mGM','uncJoe','close'], ['mGF','uncJoe','close'],
+  ['mGM','uncMike','close'], ['mGF','uncMike','close'],
 
-  <!-- Amy’s siblings (oldest to youngest by ages known) -->
-  <!-- Peggy (75) -->
-  <g class="female" transform="translate(920,300)">
-    <circle cx="0" cy="0" r="30" />
-    <text class="text" x="0" y="45">Peggy Raisor<tspan x="0" dy="14">75 | Caregiver</tspan></text>
-  </g>
-  <!-- Bonnie (62) -->
-  <g class="female" transform="translate(980,300)">
-    <circle cx="0" cy="0" r="30" />
-    <text class="text" x="0" y="45">Bonnie Raisor<tspan x="0" dy="14">62 | Caregiver</tspan></text>
-  </g>
-  <!-- Julie (60) -->
-  <g class="female" transform="translate(1040,300)">
-    <circle cx="0" cy="0" r="30" />
-    <text class="text" x="0" y="45">Julie Raisor<tspan x="0" dy="14">60 | Caregiver</tspan></text>
-  </g>
-  <!-- Joseph (deceased) -->
-  <g class="male deceased" transform="translate(1160,300)">
-    <rect x="-30" y="-30" width="60" height="60" />
-    <line x1="-30" y1="-30" x2="30" y2="30" class="xslash" />
-    <line x1="-30" y1="30" x2="30" y2="-30" class="xslash" />
-    <text class="text" x="0" y="45">Joseph Raisor ✝</text>
-  </g>
-  <!-- Michael (deceased) -->
-  <g class="male deceased" transform="translate(1220,300)">
-    <rect x="-30" y="-30" width="60" height="60" />
-    <line x1="-30" y1="-30" x2="30" y2="30" class="xslash" />
-    <line x1="-30" y1="30" x2="30" y2="-30" class="xslash" />
-    <text class="text" x="0" y="45">Michael Raisor ✝</text>
-  </g>
+  // Amy -> her children (steph, shelli, sean)
+  ['mom','steph','close'], ['mom','shelli','close'], ['mom','sean','close'],
 
-  <!-- Parent-child links: Maternal grandparents -> Amy + siblings -->
-  <line x1="1050" y1="140" x2="920"  y2="270" class="line close"/>
-  <line x1="1050" y1="140" x2="980"  y2="270" class="line close"/>
-  <line x1="1050" y1="140" x2="1040" y2="270" class="line close"/>
-  <line x1="1050" y1="140" x2="1100" y2="270" class="line close"/>
-  <line x1="1050" y1="140" x2="1160" y2="270" class="line close"/>
-  <line x1="1050" y1="140" x2="1220" y2="270" class="line close"/>
+  // Sean -> Elias
+  ['sean','elias','close'],
 
-  <!-- Relationship between Amy & Clement (parents) – Cut-Off -->
-  <line x1="250" y1="300" x2="1070" y2="300" class="line cutoff"/>
-  <text x="660" y="290" class="small">Cut-Off</text>
+  // Shelli -> her children
+  ['shelli','chris','close'], ['shelli','lydia','close'], ['shelli','israel','close'],
+  ['shelli','havilah','close'], ['shelli','evangelina','close'],
 
-  <!-- ===================== GEN 3: YOU & YOUR SIBLINGS ===================== -->
-  <!-- Order oldest→youngest with info known: Stephanie(43), Shelli(?), Sean(25) -->
-  <!-- Stephanie -->
-  <g class="female" transform="translate(980,500)">
-    <circle cx="0" cy="0" r="28" />
-    <text class="text" x="0" y="45">Stephanie Raisor<tspan x="0" dy="14">43 | Registered Nurse</tspan></text>
-  </g>
-  <!-- Shelli (age unknown) -->
-  <g class="female" transform="translate(1090,500)">
-    <circle cx="0" cy="0" r="28" />
-    <text class="text" x="0" y="45">Shelli Raisor<tspan x="0" dy="14">Registered Nurse</tspan></text>
-  </g>
-  <!-- Sean (student – mark as double square visually by thicker stroke) -->
-  <g class="male" transform="translate(1200,500)">
-    <rect x="-30" y="-30" width="60" height="60" style="stroke-width:3;" />
-    <text class="text" x="0" y="45">Sean Raisor<tspan x="0" dy="14">25 | CS Student / Founder</tspan></text>
-  </g>
+  // Stephanie -> her children
+  ['steph','bailey','close'], ['steph','ethan','close'], ['steph','ashton','close'], ['steph','oliver','close'],
+];
 
-  <!-- Parent-child (Amy -> her children) -->
-  <line x1="1100" y1="330" x2="980"  y2="472" class="line close"/><text x="1045" y="410" class="small">Close</text>
-  <line x1="1100" y1="330" x2="1090" y2="472" class="line close"/>
-  <line x1="1100" y1="330" x2="1200" y2="472" class="line close"/>
+// Relationship labels between two people not implied by parent/child
+const relLines = [
+  ['dad','mom','cutoff','Cut-Off'],   // Amy ↔ Clement: Cut-Off
+  ['sean','dad','cutoff','Cut-Off'],  // Sean ↔ Father: Cut-Off
+  ['sean','shelli','amicable','Amicable'],
+  ['sean','steph','amicable','Amicable']
+];
 
-  <!-- Sean’s relationship to father: Cut-Off -->
-  <line x1="1200" y1="500" x2="220" y2="300" class="line cutoff"/>
-  <text x="780" y="430" class="small">Cut-Off</text>
+/* --------------------------- Auto Layout --------------------------- */
+const svg = document.getElementById('genogram');
 
-  <!-- Sibling relationships (Sean–Shelli–Stephanie): Amicable -->
-  <line x1="1200" y1="500" x2="1090" y2="500" class="line amicable"/>
-  <text x="1140" y="490" class="small">Amicable</text>
-  <line x1="1090" y1="500" x2="980" y2="500" class="line amicable"/>
-  <text x="1035" y="490" class="small">Amicable</text>
+// group people by generation and side for placement
+const gens = [1,2,3,4];
+const sideOrder = ['paternal','maternal'];
 
-  <!-- ===================== GEN 4: CHILDREN ===================== -->
-  <!-- Sean’s son Elias -->
-  <g class="male" transform="translate(1200,650)">
-    <rect x="-25" y="-25" width="50" height="50" />
-    <text class="text" x="0" y="40">Elias Raisor<tspan x="0" dy="14">4 | Preschool</tspan></text>
-  </g>
-  <line x1="1200" y1="530" x2="1200" y2="625" class="line close"/><text x="1215" y="585" class="small">Close</text>
+const placements = new Map(); // id -> {x,y,w,h,cx,cy}
 
-  <!-- Shelli’s children (as a sibling line under Shelli with labels) -->
-  <!-- Layout as text block to keep one-page fit; (optional: expand to full boxes if you prefer) -->
-  <text x="1090" y="650" class="text" text-anchor="middle">
-    Shelli’s Children (oldest → youngest): 
-    <tspan x="1090" dy="14">Chris Brammer (27)</tspan>
-    <tspan x="1090" dy="14">Lydia Planche (23)</tspan>
-    <tspan x="1090" dy="14">Israel Planche ✝ (18)</tspan>
-    <tspan x="1090" dy="14">Havilah Planche (13)</tspan>
-    <tspan x="1090" dy="14">Evangelina Planche (3)</tspan>
-  </text>
-  <!-- Mark deceased (Israel) with small red X indicator -->
-  <line x1="1065" y1="690" x2="1115" y2="710" class="xslash"/>
-  <line x1="1065" y1="710" x2="1115" y2="690" class="xslash"/>
+function measureText(t, font='12px Arial'){
+  // rough width estimate (no external fonts): ~ 0.6 * chars * font px
+  const lines = t.split('\n');
+  const maxLen = Math.max(...lines.map(s=>s.length||1));
+  const width = Math.max(80, Math.min(220, Math.round(maxLen * 6.2)));
+  const height = Math.max(48, lines.length * 14 + 28);
+  return {w: width, h: height};
+}
 
-  <!-- Stephanie’s children -->
-  <text x="980" y="650" class="text" text-anchor="middle">
-    Stephanie’s Children (oldest → youngest): 
-    <tspan x="980" dy="14">Bailey Gravely (25)</tspan>
-    <tspan x="980" dy="14">Ethan Wellman (22)</tspan>
-    <tspan x="980" dy="14">Ashton Wellman (13)</tspan>
-    <tspan x="980" dy="14">Oliver Wellman (10)</tspan>
-  </text>
+function nodeLabel(p){
+  const a = p.age ? `Age: ${p.age}` : '';
+  const e = p.edu ? p.edu : '';
+  const o = p.occ ? p.occ : '';
+  // compact 3-line label
+  return `${p.name}\n${a}${(a&&e)?' | ':''}${(!a&&e)?e:''}${(!a&&e&&o)?' | ':''}${(!a&& !e && o)?o:''}\n${(a||e)?o:''}`;
+}
 
-  <!-- ===================== LEGEND / THEMES / VERIFICATION ===================== -->
-  <rect x="30" y="600" width="520" height="230" fill="none" stroke="#333" />
-  <text x="50" y="625" class="legend">Legend (Symbols)</text>
-  <text x="50" y="645" class="muted">
-    ☐ Male &nbsp;&nbsp; ○ Female &nbsp;&nbsp; X (red slash) = Deceased &nbsp;&nbsp; Double-thick square = Student (You)
-  </text>
+function placeNodes(){
+  const colWidth =  (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--w')) + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--xgap')));
+  const rowHeight = (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--h')) + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--ygap')));
 
-  <text x="50" y="675" class="legend">Legend (Relationship Lines)</text>
-  <line x1="50" y1="690" x2="120" y2="690" class="line close" />
-  <text x="130" y="694" class="small">Close</text>
-  <line x1="200" y1="690" x2="270" y2="690" class="line amicable" />
-  <text x="280" y="694" class="small">Amicable</text>
-  <line x1="350" y1="690" x2="420" y2="690" class="line distant" />
-  <text x="430" y="694" class="small">Distant</text>
-  <line x1="50" y1="715" x2="120" y2="715" class="line cutoff" />
-  <text x="130" y="719" class="small">Cut-Off</text>
+  gens.forEach((g,gi)=>{
+    const rowY = 110 + gi * rowHeight;
+    // left side nodes of this generation
+    const left = people.filter(p=>p.gen===g && p.side==='paternal');
+    const right = people.filter(p=>p.gen===g && p.side==='maternal');
 
-  <text x="50" y="750" class="legend">Themes (Color Key – kept to legend only)</text>
-  <text x="50" y="770" class="muted">🟣 Parenting: Strong Matriarchal Influence</text>
-  <text x="50" y="790" class="muted">🔵 Communication: Emotional Distance / Cut-Off</text>
+    // sort siblings oldest→youngest where we know ages; otherwise keep given order
+    const ageRank = val=>{
+      if(!val || val==='?') return 999;
+      // extract first number
+      const m = String(val).match(/\d+/);
+      return m ? 100 - parseInt(m[0],10) : 999; // bigger age => earlier
+    };
+    const sortByAge = arr => arr.slice().sort((a,b)=> ageRank(a.age) - ageRank(b.age));
 
-  <text x="50" y="820" class="legend">Verification & Missing Info</text>
-  <text x="50" y="840" class="muted">
-    Information verified through Amy Raisor and personal knowledge. Paternal grandfather details are unknown due to long-term family cut-off. 
-    This unavailability itself reflects the cut-off communication theme.
-  </text>
+    const L = sortByAge(left);
+    const R = sortByAge(right);
 
-</svg>
+    // columns: paternal left from center, maternal right from center
+    const centerX = 700;
+    const startLeft = centerX - (colWidth * (L.length)) - 60;
+    const startRight = centerX + 60;
+
+    L.forEach((p,idx)=>{
+      const text = nodeLabel(p);
+      const {w,h} = measureText(text);
+      const x = startLeft + idx*colWidth - w/2 + (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--w'))/2);
+      const y = rowY - h/2;
+      placements.set(p.id,{x,y,w,h,cx:x+w/2,cy:y+h/2});
+    });
+
+    R.forEach((p,idx)=>{
+      const text = nodeLabel(p);
+      const {w,h} = measureText(text);
+      const x = startRight + idx*colWidth - w/2 + (parseInt(getComputedStyle(document.document.documentElement || document.documentElement).getPropertyValue('--w'))/2);
+      const y = rowY - h/2;
+      placements.set(p.id,{x,y,w,h,cx:x+w/2,cy:y+h/2});
+    });
+  });
+}
+
+function drawNode(p){
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  const pos = placements.get(p.id);
+  const cx = pos.cx, cy = pos.cy;
+  const isMale = p.sex==='M';
+  g.setAttribute('class', (isMale?'male':'female') + (p.deceased?' deceased':''));
+  g.setAttribute('transform', `translate(${cx},${cy})`);
+
+  if(isMale){
+    const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+    r.setAttribute('x', -pos.w/2); r.setAttribute('y', -pos.h/2);
+    r.setAttribute('width', pos.w); r.setAttribute('height', pos.h);
+    r.setAttribute('style', `stroke-width:${p.student?3:2}`);
+    g.appendChild(r);
+  }else{
+    const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    // approximate circle radius from node box
+    const rad = Math.max(32, Math.min(pos.w,pos.h)/2);
+    c.setAttribute('r', rad);
+    g.appendChild(c);
+  }
+
+  if(p.deceased){
+    const l1 = document.createElementNS('http://www.w3.org/2000/svg','line');
+    const l2 = document.createElementNS('http://www.w3.org/2000/svg','line');
+    const w = Math.min(pos.w,pos.h)*0.9;
+    l1.setAttribute('x1', -w/2); l1.setAttribute('y1', -w/2);
+    l1.setAttribute('x2',  w/2); l1.setAttribute('y2',  w/2);
+    l2.setAttribute('x1', -w/2); l2.setAttribute('y1',  w/2);
+    l2.setAttribute('x2',  w/2); l2.setAttribute('y2', -w/2);
+    l1.setAttribute('class','xslash'); l2.setAttribute('class','xslash');
+    g.appendChild(l1); g.appendChild(l2);
+  }
+
+  const t = document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('class','nodeText');
+  t.setAttribute('x',0); t.setAttribute('y', (p.sex==='F'? (Math.max(32,Math.min(pos.w,pos.h)/2)+16) : (pos.h/2+16)));
+  nodeLabel(p).split('\n').forEach((line,i)=>{
+    const tsp = document.createElementNS('http://www.w3.org/2000/svg','tspan');
+    tsp.setAttribute('x','0');
+    tsp.setAttribute('dy', i===0 ? 0 : 14);
+    tsp.textContent = line;
+    t.appendChild(tsp);
+  });
+  g.appendChild(t);
+
+  svg.appendChild(g);
+}
+
+function mid(a,b){ return {x:(a.cx+b.cx)/2, y:(a.cy+b.cy)/2}; }
+
+function drawLine(aId,bId,cls,label){
+  const A = placements.get(aId), B = placements.get(bId);
+  const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+  line.setAttribute('x1', A.cx); line.setAttribute('y1', A.cy);
+  line.setAttribute('x2', B.cx); line.setAttribute('y2', B.cy);
+  line.setAttribute('class', `line ${cls}`);
+  svg.appendChild(line);
+
+  if(label){
+    const m = mid(A,B);
+    const tx = document.createElementNS('http://www.w3.org/2000/svg','text');
+    tx.setAttribute('class','label');
+    tx.setAttribute('x', m.x); tx.setAttribute('y', m.y - 6);
+    tx.setAttribute('text-anchor','middle');
+    tx.textContent = label;
+    svg.appendChild(tx);
+  }
+}
+
+function init(){
+  placeNodes();
+
+  // draw nodes
+  people.forEach(drawNode);
+
+  // draw couple (marriage) lines
+  couples.forEach(([a,b,type])=>{
+    drawLine(a,b,type,'Close');
+  });
+
+  // draw parent-child connectors (as lines; label once in the middle for clarity)
+  parentChild.forEach(([p,c,type])=>{
+    drawLine(p,c,type, (type==='close'?'Parent–Child':''));
+  });
+
+  // explicit relationship lines (non-hierarchical: e.g., cut-offs and sibling amicable)
+  relLines.forEach(([a,b,type,label])=>{
+    drawLine(a,b,type,label||'');
+  });
+}
+
+init();
+</script>
 </body>
 </html>
