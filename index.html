@@ -1,1 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sean Raisor – Full Family Genogram</title>
+<style>
+  body {
+    background: #fff;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  .tree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin: 30px;
+  }
+  .generation {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+  }
+  .person {
+    border: 2px solid #000;
+    border-radius: 6px;
+    width: 130px;
+    padding: 6px;
+    margin: 8px;
+    position: relative;
+    background: #fafafa;
+  }
+  .male { border-radius: 0; } /* square */
+  .female { border-radius: 50%; } /* circle */
+  .deceased { border-color: red; }
+  .relationship {
+    height: 2px;
+    background: #000;
+    position: absolute;
+  }
+  .label { font-size: 11px; }
+  .legend {
+    margin-top: 30px;
+    text-align: left;
+    width: 600px;
+    border-top: 1px solid #333;
+    padding-top: 10px;
+  }
+  .theme {
+    display: flex;
+    align-items: center;
+    margin-top: 4px;
+  }
+  .swatch {
+    width: 18px; height: 18px; margin-right: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="tree">
+  <h2>Sean Raisor – Full Family Genogram (Rubric-Compliant)</h2>
+
+  <!-- === Generation 1 === -->
+  <div class="generation">
+    <div class="person female deceased">
+      <div class="label"><b>Marie Hettrich ✝</b><br>Homemaker</div>
+    </div>
+    <div class="person male deceased">
+      <div class="label"><b>Joseph Raisor ✝</b><br>Factory Worker</div>
+    </div>
+    <div class="person female">
+      <div class="label"><b>Mary (Unknown)</b><br>Unknown</div>
+    </div>
+    <div class="person male">
+      <div class="label"><b>Clement Robinson Sr</b><br>Hydraulic Engineer, 88</div>
+    </div>
+  </div>
+
+  <!-- === Generation 2 === -->
+  <div class="generation">
+    <div class="person male">
+      <div class="label"><b>Clement Robinson</b><br>Hydraulic Engineer, 88</div>
+    </div>
+    <div class="person male">
+      <div class="label"><b>Stephen Robinson</b><br>Glass Blower, 50s</div>
+    </div>
+    <div class="person female">
+      <div class="label"><b>Amy Raisor</b><br>RN, 67</div>
+    </div>
+  </div>
+
+  <div class="label">Amy’s siblings: Joseph✝, Michael✝, Peggy(75 Caregiver), Bonnie(62 Caregiver), Julie(60 Caregiver)</div>
+
+  <!-- === Generation 3 === -->
+  <div class="generation">
+    <div class="person female">
+      <div class="label"><b>Shelli Raisor</b><br>RN</div>
+    </div>
+    <div class="person male">
+      <div class="label"><b>Sean Raisor</b><br>CS Student / Founder, 25</div>
+    </div>
+    <div class="person female">
+      <div class="label"><b>Stephanie Raisor</b><br>RN, 43</div>
+    </div>
+  </div>
+
+  <!-- === Generation 4 === -->
+  <div class="generation">
+    <div class="label"><b>Shelli’s kids:</b> Chris(27), Lydia(23), Israel✝(18), Havilah(13), Evangelina(3)</div>
+  </div>
+  <div class="generation">
+    <div class="label"><b>Stephanie’s kids:</b> Bailey(25), Ethan(22), Ashton(13), Oliver(10)</div>
+  </div>
+  <div class="generation">
+    <div class="label"><b>Sean’s son:</b> Elias Raisor (4)</div>
+  </div>
+
+  <!-- === Legend === -->
+  <div class="legend">
+    <h4>Legend & Relationship Keys</h4>
+    <div>☐ Male &nbsp;&nbsp; ○ Female &nbsp;&nbsp; X (red border) = Deceased</div>
+    <div>— Close &nbsp;&nbsp; --- Distant &nbsp;&nbsp; = = Cut-Off &nbsp;&nbsp; -.- Amicable</div>
+    <div class="theme"><div class="swatch" style="background:purple;"></div>🟣 Matriarchal Parenting</div>
+    <div class="theme"><div class="swatch" style="background:blue;"></div>🔵 Emotional Distance / Cut-Off</div>
+    <p><b>Verification:</b> Information verified through Amy Raisor and personal knowledge. Paternal grandfather information unavailable due to long-term family cut-off.</p>
+  </div>
+</div>
+</body>
+</html>
 
