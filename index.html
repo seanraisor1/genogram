@@ -2,35 +2,34 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<title>Sean Raisor – Genogram (Rubric-Compliant, Auto-Layout)</title>
+<title>Sean Raisor – Genogram (Rubric-Compliant, One-Page Landscape)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <style>
-  :root{
-    --w: 150;   /* base node width */
-    --h: 66;    /* base node height */
-    --xgap: 50; /* horizontal gap between nodes */
-    --ygap: 90; /* vertical gap between generations/rows */
-    --font: 12px;
-  }
-  html,body{margin:0;background:#fff;font-family:Arial,Helvetica,sans-serif;}
-  .page{max-width:1400px;margin:8px auto;padding:8px;}
+  html,body{margin:0;background:#fff;font-family:Arial,Helvetica,sans-serif}
+  @media print{@page{size:A4 landscape;margin:10mm}}
+
+  .page{max-width:1400px;margin:8px auto;padding:8px}
   h1{font-size:20px;margin:0 0 4px;text-align:center}
   h2{font-size:13px;margin:0 0 10px;text-align:center;color:#555}
-  .legend{font-size:12px;margin-top:8px}
+
   svg{width:100%;height:auto;border:1px solid #ddd;background:#fff}
-  /* shapes */
+
+  /* node shapes */
   .male rect{fill:none;stroke:#000;stroke-width:2}
   .female circle{fill:none;stroke:#000;stroke-width:2}
   .deceased rect,.deceased circle{stroke:#c00}
   .xslash{stroke:#c00;stroke-width:2.2}
-  /* lines */
+
+  /* relationship lines */
   .line{stroke-width:2;fill:none}
-  .close{stroke:#000}
-  .amicable{stroke:#666;stroke-dasharray:6 3 1 3}
-  .distant{stroke:#777;stroke-dasharray:5 4}
-  .cutoff{stroke:#06f;stroke-dasharray:2 3}
+  .close{stroke:#000}                       /* solid */
+  .amicable{stroke:#666;stroke-dasharray:6 3 1 3} /* dash-dot */
+  .distant{stroke:#777;stroke-dasharray:5 4}      /* dashed */
+  .cutoff{stroke:#06f;stroke-dasharray:2 3}       /* fine dashed (blue) */
+
   .label{font-size:10px;fill:#000}
   .nodeText{font-size:12px;fill:#000;text-anchor:middle}
+  .legend{font-size:12px}
   .small{font-size:11px;fill:#444}
   .keyRow{display:flex;gap:18px;align-items:center;margin:4px 0}
   .keySwatch{width:48px;height:0;border-top:2px solid #000}
@@ -38,7 +37,6 @@
   .keySwatch.distant{border-top:2px dashed #777}
   .keySwatch.cutoff{border-top:2px dashed #06f}
   .foot{font-size:12px;margin-top:6px;color:#444}
-  @media print{@page{size: A4 landscape; margin:10mm}}
 </style>
 </head>
 <body>
@@ -48,12 +46,10 @@
 
   <svg id="genogram" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMin slice"></svg>
 
-  <div class="legend">
+  <div class="legend" style="margin-top:8px">
     <div class="keyRow">
       <div>Symbols:</div>
-      <div>☐ Male</div>
-      <div>○ Female</div>
-      <div>X (red slash) = Deceased</div>
+      <div>☐ Male</div><div>○ Female</div><div>X (red slash) = Deceased</div>
       <div>Double-thick square = Student (Sean)</div>
     </div>
     <div class="keyRow">
@@ -68,32 +64,29 @@
       <div>🟣 Parenting: Strong Matriarchal Influence</div>
       <div>🔵 Communication: Emotional Distance / Cut-Off</div>
     </div>
-    <div class="foot"><b>Verification:</b> Information verified through Amy Raisor and personal knowledge. Paternal grandfather details unknown due to long-term cut-off (this unavailability itself reflects the cut-off theme).</div>
+    <div class="foot"><b>Verification:</b> Information verified through Amy Raisor and personal knowledge. Paternal grandfather details unknown due to long-term cut-off (this unavailability reflects the cut-off theme).</div>
   </div>
 </div>
 
 <script>
-/**
- * Auto-layout genogram: define people and relations, the script computes a clean grid
- * so nodes don’t overlap. You can edit the data below without changing coordinates.
- *
- * Conventions:
- * - sex: 'M' | 'F'
- * - deceased: true|false
- * - gen: 1 (grandparents), 2 (parents & their siblings), 3 (you & siblings), 4 (children)
- * - side: 'paternal' | 'maternal' (controls left/right bias)
- * - rel: relationship lines between ids with type: close | amicable | distant | cutoff, with optional label
- */
+/* === Tunable spacing (no CSS variable errors) === */
+const BASE_W = 150;   // base node width
+const BASE_H = 70;    // base node height
+const X_GAP  = 60;    // horizontal gap between nodes
+const Y_GAP  = 110;   // vertical gap between generations
+const LEFT_BIAS  = 520;  // center split offset: left side start < 700
+const RIGHT_BIAS = 740;  // right side start > 700
 
+/* === Data (you can edit ages/occupations here; layout auto-updates) === */
 const people = [
-  // ===== Gen 1: Grandparents =====
+  // Gen 1
   {id:'pGF', name:'Unknown (Paternal Grandfather)', age:'?', edu:'?', occ:'?', sex:'M', deceased:false, gen:1, side:'paternal'},
   {id:'pGM', name:'Mary (last name unknown)', age:'?', edu:'?', occ:'Unknown', sex:'F', deceased:false, gen:1, side:'paternal'},
 
   {id:'mGM', name:'Marie Hettrich', age:'✝', edu:'?', occ:'Homemaker', sex:'F', deceased:true, gen:1, side:'maternal'},
   {id:'mGF', name:'Joseph Raisor', age:'✝', edu:'?', occ:'Factory Worker', sex:'M', deceased:true, gen:1, side:'maternal'},
 
-  // ===== Gen 2: Parents + aunts/uncles =====
+  // Gen 2
   {id:'dad', name:'Clement Robinson', age:'88', edu:'?', occ:'Hydraulic Engineer', sex:'M', deceased:false, gen:2, side:'paternal'},
   {id:'stephen', name:'Stephen Robinson', age:'50s', edu:'?', occ:'Glass Blower', sex:'M', deceased:false, gen:2, side:'paternal'},
 
@@ -104,12 +97,12 @@ const people = [
   {id:'uncJoe', name:'Joseph Raisor', age:'✝', edu:'?', occ:'?', sex:'M', deceased:true, gen:2, side:'maternal'},
   {id:'uncMike', name:'Michael Raisor', age:'✝', edu:'?', occ:'?', sex:'M', deceased:true, gen:2, side:'maternal'},
 
-  // ===== Gen 3: You & siblings =====
+  // Gen 3
   {id:'steph', name:'Stephanie Raisor', age:'43', edu:'Nursing', occ:'Registered Nurse', sex:'F', deceased:false, gen:3, side:'maternal'},
   {id:'shelli', name:'Shelli Raisor', age:'?', edu:'Nursing', occ:'Registered Nurse', sex:'F', deceased:false, gen:3, side:'maternal'},
   {id:'sean', name:'Sean Raisor', age:'25', edu:'College', occ:'CS Student / Founder', sex:'M', deceased:false, gen:3, side:'maternal', student:true},
 
-  // ===== Gen 4: Children =====
+  // Gen 4
   {id:'elias', name:'Elias Raisor', age:'4', edu:'Preschool', occ:'Child', sex:'M', deceased:false, gen:4, side:'maternal'},
 
   {id:'chris', name:'Chris Brammer', age:'27', edu:'?', occ:'?', sex:'M', deceased:false, gen:4, side:'maternal'},
@@ -124,20 +117,18 @@ const people = [
   {id:'oliver', name:'Oliver Wellman', age:'10', edu:'?', occ:'?', sex:'M', deceased:false, gen:4, side:'maternal'}
 ];
 
-// Couples (for marriage/union lines)
 const couples = [
-  ['pGF','pGM','close'],            // paternal grandparents
-  ['mGM','mGF','close'],            // maternal grandparents
+  ['pGF','pGM','close'],   // paternal grandparents
+  ['mGM','mGF','close']    // maternal grandparents
 ];
 
-// Parent-child links
 const parentChild = [
-  // paternal side
+  // paternal grandparents -> dad
   ['pGF','dad','close'], ['pGM','dad','close'],
-  // Stephen is dad's other child (half-brother to you) – we only show as dad->stephen
+  // dad -> stephen (half-brother)
   ['dad','stephen','amicable'],
 
-  // maternal side: grandparents -> Amy + siblings
+  // maternal grandparents -> Amy + siblings
   ['mGM','mom','close'], ['mGF','mom','close'],
   ['mGM','peggy','close'], ['mGF','peggy','close'],
   ['mGM','bonnie','close'], ['mGF','bonnie','close'],
@@ -145,7 +136,7 @@ const parentChild = [
   ['mGM','uncJoe','close'], ['mGF','uncJoe','close'],
   ['mGM','uncMike','close'], ['mGF','uncMike','close'],
 
-  // Amy -> her children (steph, shelli, sean)
+  // Amy -> her children
   ['mom','steph','close'], ['mom','shelli','close'], ['mom','sean','close'],
 
   // Sean -> Elias
@@ -156,114 +147,96 @@ const parentChild = [
   ['shelli','havilah','close'], ['shelli','evangelina','close'],
 
   // Stephanie -> her children
-  ['steph','bailey','close'], ['steph','ethan','close'], ['steph','ashton','close'], ['steph','oliver','close'],
+  ['steph','bailey','close'], ['steph','ethan','close'], ['steph','ashton','close'], ['steph','oliver','close']
 ];
 
-// Relationship labels between two people not implied by parent/child
+// explicit relationship lines
 const relLines = [
-  ['dad','mom','cutoff','Cut-Off'],   // Amy ↔ Clement: Cut-Off
-  ['sean','dad','cutoff','Cut-Off'],  // Sean ↔ Father: Cut-Off
+  ['dad','mom','cutoff','Cut-Off'],     // Amy ↔ Clement
+  ['sean','dad','cutoff','Cut-Off'],    // Sean ↔ Father
   ['sean','shelli','amicable','Amicable'],
   ['sean','steph','amicable','Amicable']
 ];
 
-/* --------------------------- Auto Layout --------------------------- */
+/* === Simple auto layout (no getComputedStyle typos) === */
 const svg = document.getElementById('genogram');
-
-// group people by generation and side for placement
-const gens = [1,2,3,4];
-const sideOrder = ['paternal','maternal'];
-
 const placements = new Map(); // id -> {x,y,w,h,cx,cy}
 
-function measureText(t, font='12px Arial'){
-  // rough width estimate (no external fonts): ~ 0.6 * chars * font px
-  const lines = t.split('\n');
-  const maxLen = Math.max(...lines.map(s=>s.length||1));
-  const width = Math.max(80, Math.min(220, Math.round(maxLen * 6.2)));
-  const height = Math.max(48, lines.length * 14 + 28);
-  return {w: width, h: height};
+function labelText(p){
+  const age = p.age ? `Age: ${p.age}` : '';
+  const edu = p.edu || '';
+  const occ = p.occ || '';
+  const line2 = [age, edu].filter(s=>s && s!=='?').join(' | ');
+  const lines = [p.name, line2 || '', occ].filter(Boolean);
+  return lines;
 }
 
-function nodeLabel(p){
-  const a = p.age ? `Age: ${p.age}` : '';
-  const e = p.edu ? p.edu : '';
-  const o = p.occ ? p.occ : '';
-  // compact 3-line label
-  return `${p.name}\n${a}${(a&&e)?' | ':''}${(!a&&e)?e:''}${(!a&&e&&o)?' | ':''}${(!a&& !e && o)?o:''}\n${(a||e)?o:''}`;
+function measure(lines){
+  const maxChars = Math.max(...lines.map(s=>s.length || 1));
+  const w = Math.max(BASE_W, Math.min(220, Math.round(maxChars*6.2)));
+  const h = Math.max(BASE_H, 14*lines.length + 26);
+  return {w,h};
 }
 
-function placeNodes(){
-  const colWidth =  (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--w')) + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--xgap')));
-  const rowHeight = (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--h')) + parseInt(getComputedStyle(document.documentElement).getPropertyValue('--ygap')));
+function sortByAge(arr){
+  const ageRank = v=>{
+    if(!v || v==='?') return 999;
+    const m = String(v).match(/\d+/);
+    return m ? (100 - parseInt(m[0],10)) : 999; // older first
+  };
+  return arr.slice().sort((a,b)=> ageRank(a.age) - ageRank(b.age));
+}
 
-  gens.forEach((g,gi)=>{
-    const rowY = 110 + gi * rowHeight;
-    // left side nodes of this generation
-    const left = people.filter(p=>p.gen===g && p.side==='paternal');
-    const right = people.filter(p=>p.gen===g && p.side==='maternal');
+function place(){
+  const gens = [1,2,3,4];
+  gens.forEach((g,i)=>{
+    const y = 120 + i*(BASE_H+Y_GAP);
+    const left = sortByAge(people.filter(p=>p.gen===g && p.side==='paternal'));
+    const right = sortByAge(people.filter(p=>p.gen===g && p.side==='maternal'));
 
-    // sort siblings oldest→youngest where we know ages; otherwise keep given order
-    const ageRank = val=>{
-      if(!val || val==='?') return 999;
-      // extract first number
-      const m = String(val).match(/\d+/);
-      return m ? 100 - parseInt(m[0],10) : 999; // bigger age => earlier
-    };
-    const sortByAge = arr => arr.slice().sort((a,b)=> ageRank(a.age) - ageRank(b.age));
-
-    const L = sortByAge(left);
-    const R = sortByAge(right);
-
-    // columns: paternal left from center, maternal right from center
-    const centerX = 700;
-    const startLeft = centerX - (colWidth * (L.length)) - 60;
-    const startRight = centerX + 60;
-
-    L.forEach((p,idx)=>{
-      const text = nodeLabel(p);
-      const {w,h} = measureText(text);
-      const x = startLeft + idx*colWidth - w/2 + (parseInt(getComputedStyle(document.documentElement).getPropertyValue('--w'))/2);
-      const y = rowY - h/2;
+    left.forEach((p,idx)=>{
+      const lines = labelText(p);
+      const {w,h} = measure(lines);
+      const x = LEFT_BIAS - (left.length-1)*((BASE_W+X_GAP)/2) + idx*(BASE_W+X_GAP);
       placements.set(p.id,{x,y,w,h,cx:x+w/2,cy:y+h/2});
     });
 
-    R.forEach((p,idx)=>{
-      const text = nodeLabel(p);
-      const {w,h} = measureText(text);
-      const x = startRight + idx*colWidth - w/2 + (parseInt(getComputedStyle(document.document.documentElement || document.documentElement).getPropertyValue('--w'))/2);
-      const y = rowY - h/2;
+    right.forEach((p,idx)=>{
+      const lines = labelText(p);
+      const {w,h} = measure(lines);
+      const x = RIGHT_BIAS - (right.length-1)*((BASE_W+X_GAP)/2) + idx*(BASE_W+X_GAP);
       placements.set(p.id,{x,y,w,h,cx:x+w/2,cy:y+h/2});
     });
   });
 }
 
-function drawNode(p){
-  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-  const pos = placements.get(p.id);
-  const cx = pos.cx, cy = pos.cy;
-  const isMale = p.sex==='M';
-  g.setAttribute('class', (isMale?'male':'female') + (p.deceased?' deceased':''));
-  g.setAttribute('transform', `translate(${cx},${cy})`);
+function add(el){ svg.appendChild(el); }
 
-  if(isMale){
+function drawNode(p){
+  const pos = placements.get(p.id);
+  const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.setAttribute('class', (p.sex==='M'?'male':'female') + (p.deceased?' deceased':''));
+  g.setAttribute('transform', `translate(${pos.cx},${pos.cy})`);
+
+  if(p.sex==='M'){
     const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
-    r.setAttribute('x', -pos.w/2); r.setAttribute('y', -pos.h/2);
-    r.setAttribute('width', pos.w); r.setAttribute('height', pos.h);
-    r.setAttribute('style', `stroke-width:${p.student?3:2}`);
+    r.setAttribute('x', -pos.w/2);
+    r.setAttribute('y', -pos.h/2);
+    r.setAttribute('width', pos.w);
+    r.setAttribute('height', pos.h);
+    if(p.student) r.setAttribute('style','stroke-width:3');
     g.appendChild(r);
   }else{
     const c = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    // approximate circle radius from node box
-    const rad = Math.max(32, Math.min(pos.w,pos.h)/2);
+    const rad = Math.max(35, Math.min(pos.w,pos.h)/2);
     c.setAttribute('r', rad);
     g.appendChild(c);
   }
 
   if(p.deceased){
+    const w = Math.min(pos.w,pos.h)*0.9;
     const l1 = document.createElementNS('http://www.w3.org/2000/svg','line');
     const l2 = document.createElementNS('http://www.w3.org/2000/svg','line');
-    const w = Math.min(pos.w,pos.h)*0.9;
     l1.setAttribute('x1', -w/2); l1.setAttribute('y1', -w/2);
     l1.setAttribute('x2',  w/2); l1.setAttribute('y2',  w/2);
     l2.setAttribute('x1', -w/2); l2.setAttribute('y1',  w/2);
@@ -274,60 +247,47 @@ function drawNode(p){
 
   const t = document.createElementNS('http://www.w3.org/2000/svg','text');
   t.setAttribute('class','nodeText');
-  t.setAttribute('x',0); t.setAttribute('y', (p.sex==='F'? (Math.max(32,Math.min(pos.w,pos.h)/2)+16) : (pos.h/2+16)));
-  nodeLabel(p).split('\n').forEach((line,i)=>{
-    const tsp = document.createElementNS('http://www.w3.org/2000/svg','tspan');
-    tsp.setAttribute('x','0');
-    tsp.setAttribute('dy', i===0 ? 0 : 14);
-    tsp.textContent = line;
-    t.appendChild(tsp);
+  t.setAttribute('x',0);
+  t.setAttribute('y', (p.sex==='F' ? Math.max(35, Math.min(pos.w,pos.h)/2)+16 : pos.h/2+16));
+  labelText(p).forEach((line,i)=>{
+    const ts = document.createElementNS('http://www.w3.org/2000/svg','tspan');
+    ts.setAttribute('x','0'); ts.setAttribute('dy', i?14:0);
+    ts.textContent = line;
+    t.appendChild(ts);
   });
   g.appendChild(t);
-
-  svg.appendChild(g);
+  add(g);
 }
-
-function mid(a,b){ return {x:(a.cx+b.cx)/2, y:(a.cy+b.cy)/2}; }
 
 function drawLine(aId,bId,cls,label){
   const A = placements.get(aId), B = placements.get(bId);
-  const line = document.createElementNS('http://www.w3.org/2000/svg','line');
-  line.setAttribute('x1', A.cx); line.setAttribute('y1', A.cy);
-  line.setAttribute('x2', B.cx); line.setAttribute('y2', B.cy);
-  line.setAttribute('class', `line ${cls}`);
-  svg.appendChild(line);
-
+  if(!A || !B) return;
+  const L = document.createElementNS('http://www.w3.org/2000/svg','line');
+  L.setAttribute('x1', A.cx); L.setAttribute('y1', A.cy);
+  L.setAttribute('x2', B.cx); L.setAttribute('y2', B.cy);
+  L.setAttribute('class', `line ${cls}`);
+  add(L);
   if(label){
-    const m = mid(A,B);
     const tx = document.createElementNS('http://www.w3.org/2000/svg','text');
     tx.setAttribute('class','label');
-    tx.setAttribute('x', m.x); tx.setAttribute('y', m.y - 6);
+    tx.setAttribute('x', (A.cx+B.cx)/2);
+    tx.setAttribute('y', (A.cy+B.cy)/2 - 6);
     tx.setAttribute('text-anchor','middle');
     tx.textContent = label;
-    svg.appendChild(tx);
+    add(tx);
   }
 }
 
 function init(){
-  placeNodes();
+  place();
 
-  // draw nodes
+  // draw lines FIRST so nodes sit on top
+  couples.forEach(([a,b,type])=> drawLine(a,b,type,'Close'));
+  parentChild.forEach(([p,c,type])=> drawLine(p,c,type, type==='close'?'Parent–Child':''));
+  relLines.forEach(([a,b,type,label])=> drawLine(a,b,type,label||''));
+
+  // draw nodes on top
   people.forEach(drawNode);
-
-  // draw couple (marriage) lines
-  couples.forEach(([a,b,type])=>{
-    drawLine(a,b,type,'Close');
-  });
-
-  // draw parent-child connectors (as lines; label once in the middle for clarity)
-  parentChild.forEach(([p,c,type])=>{
-    drawLine(p,c,type, (type==='close'?'Parent–Child':''));
-  });
-
-  // explicit relationship lines (non-hierarchical: e.g., cut-offs and sibling amicable)
-  relLines.forEach(([a,b,type,label])=>{
-    drawLine(a,b,type,label||'');
-  });
 }
 
 init();
