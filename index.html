@@ -2,131 +2,106 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sean Raisor – Full Family Genogram</title>
 <style>
-  body {
-    background: #fff;
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-  }
-  .tree {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin: 30px;
-  }
-  .generation {
-    display: flex;
-    justify-content: center;
-    margin: 20px 0;
-  }
-  .person {
-    border: 2px solid #000;
-    border-radius: 6px;
-    width: 130px;
-    padding: 6px;
-    margin: 8px;
-    position: relative;
-    background: #fafafa;
-  }
-  .male { border-radius: 0; } /* square */
-  .female { border-radius: 50%; } /* circle */
-  .deceased { border-color: red; }
-  .relationship {
-    height: 2px;
-    background: #000;
-    position: absolute;
-  }
-  .label { font-size: 11px; }
-  .legend {
-    margin-top: 30px;
-    text-align: left;
-    width: 600px;
-    border-top: 1px solid #333;
-    padding-top: 10px;
-  }
-  .theme {
-    display: flex;
-    align-items: center;
-    margin-top: 4px;
-  }
-  .swatch {
-    width: 18px; height: 18px; margin-right: 8px;
-  }
+  body { font-family: Arial, sans-serif; background: #fff; margin: 0; }
+  svg { width: 100%; height: 900px; background: #fff; }
+  .male rect { fill: none; stroke: #000; stroke-width: 2; }
+  .female circle { fill: none; stroke: #000; stroke-width: 2; }
+  .deceased rect, .deceased circle { stroke: red; }
+  .text { font-size: 11px; text-anchor: middle; }
+  .line { stroke-width: 2; fill: none; }
+  .close { stroke: purple; }
+  .cutoff { stroke: blue; stroke-dasharray: 5,3; }
+  .amicable { stroke: gray; stroke-dasharray: 3,2; }
+  .label { font-size: 10px; fill: #000; }
+  .legend { font-size: 12px; }
 </style>
 </head>
 <body>
-<div class="tree">
-  <h2>Sean Raisor – Full Family Genogram (Rubric-Compliant)</h2>
+<svg viewBox="0 0 1200 900">
 
-  <!-- === Generation 1 === -->
-  <div class="generation">
-    <div class="person female deceased">
-      <div class="label"><b>Marie Hettrich ✝</b><br>Homemaker</div>
-    </div>
-    <div class="person male deceased">
-      <div class="label"><b>Joseph Raisor ✝</b><br>Factory Worker</div>
-    </div>
-    <div class="person female">
-      <div class="label"><b>Mary (Unknown)</b><br>Unknown</div>
-    </div>
-    <div class="person male">
-      <div class="label"><b>Clement Robinson Sr</b><br>Hydraulic Engineer, 88</div>
-    </div>
-  </div>
+  <!-- === GENERATION 1 (GRANDPARENTS) === -->
+  <!-- Father's side -->
+  <rect x="100" y="80" width="60" height="60" stroke="black" fill="none"/>
+  <text x="130" y="160" class="text">Clement Robinson Sr<br>88 | Hydraulic Engineer</text>
 
-  <!-- === Generation 2 === -->
-  <div class="generation">
-    <div class="person male">
-      <div class="label"><b>Clement Robinson</b><br>Hydraulic Engineer, 88</div>
-    </div>
-    <div class="person male">
-      <div class="label"><b>Stephen Robinson</b><br>Glass Blower, 50s</div>
-    </div>
-    <div class="person female">
-      <div class="label"><b>Amy Raisor</b><br>RN, 67</div>
-    </div>
-  </div>
+  <circle cx="260" cy="110" r="30" stroke="black" fill="none"/>
+  <text x="260" y="160" class="text">Mary (Unknown)<br>Unknown</text>
+  <line x1="160" y1="110" x2="230" y2="110" class="line close"/>
+  <text x="190" y="100" class="label">Close</text>
 
-  <div class="label">Amy’s siblings: Joseph✝, Michael✝, Peggy(75 Caregiver), Bonnie(62 Caregiver), Julie(60 Caregiver)</div>
+  <!-- Mother's side -->
+  <circle cx="940" cy="110" r="30" stroke="red" fill="none"/>
+  <text x="940" y="160" class="text">Marie Hettrich ✝<br>Homemaker</text>
+  <rect x="1020" y="80" width="60" height="60" stroke="red" fill="none"/>
+  <text x="1050" y="160" class="text">Joseph Raisor ✝<br>Factory Worker</text>
+  <line x1="970" y1="110" x2="1020" y2="110" class="line close"/>
+  <text x="995" y="100" class="label">Close</text>
 
-  <!-- === Generation 3 === -->
-  <div class="generation">
-    <div class="person female">
-      <div class="label"><b>Shelli Raisor</b><br>RN</div>
-    </div>
-    <div class="person male">
-      <div class="label"><b>Sean Raisor</b><br>CS Student / Founder, 25</div>
-    </div>
-    <div class="person female">
-      <div class="label"><b>Stephanie Raisor</b><br>RN, 43</div>
-    </div>
-  </div>
+  <!-- === GENERATION 2 (PARENTS + AUNTS/UNCLES) === -->
+  <rect x="340" y="300" width="60" height="60" stroke="black" fill="none"/>
+  <text x="370" y="380" class="text">Clement Robinson<br>88 | Hydraulic Engineer</text>
 
-  <!-- === Generation 4 === -->
-  <div class="generation">
-    <div class="label"><b>Shelli’s kids:</b> Chris(27), Lydia(23), Israel✝(18), Havilah(13), Evangelina(3)</div>
-  </div>
-  <div class="generation">
-    <div class="label"><b>Stephanie’s kids:</b> Bailey(25), Ethan(22), Ashton(13), Oliver(10)</div>
-  </div>
-  <div class="generation">
-    <div class="label"><b>Sean’s son:</b> Elias Raisor (4)</div>
-  </div>
+  <rect x="250" y="300" width="60" height="60" stroke="black" fill="none"/>
+  <text x="280" y="380" class="text">Stephen Robinson<br>50s | Glass Blower</text>
 
-  <!-- === Legend === -->
-  <div class="legend">
-    <h4>Legend & Relationship Keys</h4>
-    <div>☐ Male &nbsp;&nbsp; ○ Female &nbsp;&nbsp; X (red border) = Deceased</div>
-    <div>— Close &nbsp;&nbsp; --- Distant &nbsp;&nbsp; = = Cut-Off &nbsp;&nbsp; -.- Amicable</div>
-    <div class="theme"><div class="swatch" style="background:purple;"></div>🟣 Matriarchal Parenting</div>
-    <div class="theme"><div class="swatch" style="background:blue;"></div>🔵 Emotional Distance / Cut-Off</div>
-    <p><b>Verification:</b> Information verified through Amy Raisor and personal knowledge. Paternal grandfather information unavailable due to long-term family cut-off.</p>
-  </div>
-</div>
+  <circle cx="940" cy="330" r="30" stroke="black" fill="none"/>
+  <text x="940" y="390" class="text">Amy Raisor<br>67 | RN | Nursing School</text>
+
+  <text x="940" y="410" class="text">Siblings: Joseph✝, Michael✝, Peggy(75), Bonnie(62), Julie(60)</text>
+
+  <line x1="400" y1="330" x2="910" y2="330" class="line cutoff"/>
+  <text x="650" y="320" class="label">Cut-Off</text>
+
+  <!-- === GENERATION 3 (YOU + SIBLINGS) === -->
+  <circle cx="800" cy="550" r="25" stroke="black" fill="none"/>
+  <text x="800" y="600" class="text">Shelli Raisor<br>Nurse</text>
+
+  <rect x="900" y="525" width="50" height="50" stroke="black" fill="none"/>
+  <text x="925" y="600" class="text">Sean Raisor<br>25 | CS Student / Founder</text>
+
+  <circle cx="1050" cy="550" r="25" stroke="black" fill="none"/>
+  <text x="1050" y="600" class="text">Stephanie Raisor<br>43 | RN</text>
+
+  <!-- Sibling Relationships -->
+  <line x1="825" y1="550" x2="900" y2="550" class="line amicable"/>
+  <text x="860" y="540" class="label">Amicable</text>
+  <line x1="950" y1="550" x2="1025" y2="550" class="line amicable"/>
+  <text x="990" y="540" class="label">Amicable</text>
+
+  <!-- Amy → Sean -->
+  <line x1="940" y1="360" x2="925" y2="525" class="line close"/>
+  <text x="940" y="440" class="label">Close</text>
+
+  <!-- === GENERATION 4 (CHILDREN) === -->
+  <text x="780" y="680" class="text">
+    Shelli’s Kids: Chris(27), Lydia(23), Israel✝(18), Havilah(13), Evangelina(3)
+  </text>
+  <text x="1050" y="680" class="text">
+    Stephanie’s Kids: Bailey(25), Ethan(22), Ashton(13), Oliver(10)
+  </text>
+
+  <!-- Sean’s son -->
+  <rect x="910" y="680" width="40" height="40" stroke="black" fill="none"/>
+  <text x="930" y="740" class="text">Elias Raisor<br>4 | Preschool</text>
+  <line x1="925" y1="575" x2="925" y2="680" class="line close"/>
+  <text x="940" y="630" class="label">Close</text>
+
+  <!-- === LEGEND === -->
+  <text x="80" y="820" class="legend">
+    ☐ Male &nbsp;&nbsp; ○ Female &nbsp;&nbsp; Red Border = Deceased
+  </text>
+  <text x="80" y="840" class="legend">
+    🟣 Purple = Close | 🔵 Blue = Cut-Off | Gray = Amicable
+  </text>
+  <text x="80" y="860" class="legend">
+    Themes: 🟣 Matriarchal Parenting | 🔵 Emotional Distance / Cut-Off
+  </text>
+  <text x="80" y="880" class="legend">
+    Verification: Information verified by Amy Raisor and personal knowledge. Missing paternal grandfather due to long-term family cut-off.
+  </text>
+
+</svg>
 </body>
 </html>
-
